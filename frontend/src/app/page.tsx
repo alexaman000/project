@@ -29,7 +29,8 @@ export default function Home() {
 
   const fetchTodos = async () => {
     try {
-      const res = await fetch('http://localhost:3001/todos', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${apiUrl}/todos`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -48,7 +49,8 @@ export default function Home() {
     if (!newTitle.trim()) return;
 
     try {
-      const res = await fetch('http://localhost:3001/todos', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${apiUrl}/todos`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -68,7 +70,8 @@ export default function Home() {
 
   const toggleComplete = async (todo: Todo) => {
     try {
-      const res = await fetch(`http://localhost:3001/todos/${todo._id}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${apiUrl}/todos/${todo._id}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -87,7 +90,8 @@ export default function Home() {
 
   const deleteTodo = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:3001/todos/${id}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${apiUrl}/todos/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
