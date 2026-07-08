@@ -58,11 +58,11 @@ export default function AuthPage() {
         transition={{ duration: 1 }}
         className="mb-12 max-w-2xl px-4 flex flex-col items-center"
       >
-        <Quote className="text-white/40 mb-4" size={24} />
-        <h1 className="text-4xl md:text-5xl lg:text-6xl text-white mb-4 tracking-tight font-serif italic font-light leading-tight">
+        <Quote className="text-[#FDE047]/40 mb-4" size={24} />
+        <h1 className="text-4xl md:text-5xl lg:text-6xl text-[#FDE047] mb-4 tracking-tight font-serif italic font-light leading-tight">
           "The secret of getting ahead is getting started."
         </h1>
-        <p className="text-white/60 text-sm tracking-widest uppercase">Mark Twain</p>
+        <p className="text-[#FDE047]/60 text-sm tracking-widest uppercase">Mark Twain</p>
       </motion.div>
 
       <motion.div
@@ -80,7 +80,7 @@ export default function AuthPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-transparent border-none outline-none text-white placeholder:text-white/40 text-base w-full h-full"
+                className="bg-transparent border-none outline-none text-[#FDE047] placeholder:text-[#FDE047]/40 text-base w-full h-full"
               />
             </div>
             
@@ -91,7 +91,7 @@ export default function AuthPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-transparent border-none outline-none text-white placeholder:text-white/40 text-base w-full h-full tracking-wider"
+                className="bg-transparent border-none outline-none text-[#FDE047] placeholder:text-[#FDE047]/40 text-base w-full h-full tracking-wider"
               />
             </div>
           </div>
@@ -105,7 +105,7 @@ export default function AuthPage() {
           <button 
             type="submit" 
             disabled={isLoading}
-            className="w-full liquid-glass rounded-full px-6 py-3 flex items-center justify-center gap-3 text-white text-base font-medium hover:bg-white/10 transition-all group disabled:opacity-50"
+            className="w-full liquid-glass rounded-full px-6 py-3 flex items-center justify-center gap-3 text-[#FDE047] text-base font-medium hover:bg-white/10 transition-all group disabled:opacity-50"
           >
             {isLoading ? (
               <Loader2 className="animate-spin" size={20} />
@@ -120,12 +120,12 @@ export default function AuthPage() {
           </button>
         </form>
 
-        <p className="text-white/60 text-sm leading-relaxed px-4">
+        <p className="text-[#FDE047]/60 text-sm leading-relaxed px-4">
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <button 
             type="button" 
             onClick={() => setIsLogin(!isLogin)} 
-            className="text-white hover:underline font-medium"
+            className="text-[#FDE047] hover:underline font-medium"
           >
             {isLogin ? "Sign up today" : "Log in here"}
           </button>

@@ -98,7 +98,7 @@ export default function Dashboard() {
     if (code >= 1 && code <= 3) return <CloudSun size={28} className="text-gray-200" />;
     if (code >= 45 && code <= 48) return <CloudFog size={28} className="text-gray-400" />;
     if (code >= 51 && code <= 67) return <CloudRain size={28} className="text-blue-400" />;
-    if (code >= 71 && code <= 77) return <CloudSnow size={28} className="text-white" />;
+    if (code >= 71 && code <= 77) return <CloudSnow size={28} className="text-[#FDE047]" />;
     if (code >= 95) return <CloudLightning size={28} className="text-yellow-500" />;
     return <Cloud size={28} className="text-gray-300" />;
   };
@@ -303,10 +303,10 @@ export default function Dashboard() {
         className="w-full flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4"
       >
         <div>
-          <h1 className="text-4xl md:text-5xl font-serif text-white tracking-tight mb-2">
+          <h1 className="text-4xl md:text-5xl font-serif text-[#FDE047] tracking-tight mb-2">
             Good {currentTime.getHours() < 12 ? 'morning' : currentTime.getHours() < 18 ? 'afternoon' : 'evening'}, Creator.
           </h1>
-          <p className="text-white/60 font-medium text-lg flex items-center gap-3">
+          <p className="text-[#FDE047]/60 font-medium text-lg flex items-center gap-3">
             {currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
             <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
             <span className="font-mono tracking-widest">{currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
@@ -322,8 +322,8 @@ export default function Dashboard() {
           >
             {getWeatherIcon(weather.code)}
             <div className="flex flex-col">
-              <span className="text-2xl font-serif text-white leading-none">{weather.temp}°C</span>
-              <span className="text-xs text-white/50 uppercase tracking-widest mt-1">Local</span>
+              <span className="text-2xl font-serif text-[#FDE047] leading-none">{weather.temp}°C</span>
+              <span className="text-xs text-[#FDE047]/50 uppercase tracking-widest mt-1">Local</span>
             </div>
           </motion.div>
         )}
@@ -343,11 +343,11 @@ export default function Dashboard() {
             transition={{ delay: i * 0.1 }}
             className="liquid-glass rounded-2xl p-6 flex flex-col gap-2 relative overflow-hidden group"
           >
-            <div className="flex justify-between items-center text-white/50">
+            <div className="flex justify-between items-center text-[#FDE047]/50">
               <span className="text-sm font-bold uppercase tracking-wider">{stat.label}</span>
               {stat.icon}
             </div>
-            <span className="text-4xl font-serif text-white">{stat.value}</span>
+            <span className="text-4xl font-serif text-[#FDE047]">{stat.value}</span>
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/10 transition-colors" />
           </motion.div>
         ))}
@@ -365,37 +365,37 @@ export default function Dashboard() {
             value={newTitle}
             onChange={e => setNewTitle(e.target.value)}
             placeholder="Type a new task and press Enter..."
-            className="bg-transparent border-none outline-none text-white placeholder:text-white/40 flex-1 px-2"
+            className="bg-transparent border-none outline-none text-[#FDE047] placeholder:text-[#FDE047]/40 flex-1 px-2"
           />
           <select 
             value={newPriority} 
             onChange={e => setNewPriority(e.target.value as any)}
-            className="bg-transparent text-white/70 border-none outline-none text-sm cursor-pointer hidden md:block"
+            className="bg-transparent text-[#FDE047]/70 border-none outline-none text-sm cursor-pointer hidden md:block"
           >
             <option value="High" className="bg-[#0a192f]">High Priority</option>
             <option value="Medium" className="bg-[#0a192f]">Medium Priority</option>
             <option value="Low" className="bg-[#0a192f]">Low Priority</option>
           </select>
-          <button type="submit" className="ml-4 bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors text-white">
+          <button type="submit" className="ml-4 bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors text-[#FDE047]">
             <Plus size={20} />
           </button>
         </form>
 
         <div className="flex items-center gap-2 px-2">
           <div className="flex items-center bg-black/20 rounded-full px-4 py-2 border border-white/5 w-full md:w-auto">
-            <Search size={16} className="text-white/40 mr-2" />
+            <Search size={16} className="text-[#FDE047]/40 mr-2" />
             <input
               ref={searchInputRef}
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search (Ctrl+K)"
-              className="bg-transparent border-none outline-none text-white placeholder:text-white/40 text-sm w-32"
+              className="bg-transparent border-none outline-none text-[#FDE047] placeholder:text-[#FDE047]/40 text-sm w-32"
             />
           </div>
           <select 
             value={filterStatus} 
             onChange={e => setFilterStatus(e.target.value)}
-            className="bg-black/20 text-white/80 rounded-full px-4 py-2 text-sm outline-none border border-white/5"
+            className="bg-black/20 text-[#FDE047]/80 rounded-full px-4 py-2 text-sm outline-none border border-white/5"
           >
             <option value="All" className="bg-[#0a192f]">All</option>
             <option value="Active" className="bg-[#0a192f]">Active</option>
@@ -418,7 +418,7 @@ export default function Dashboard() {
             className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
               filterCategory === cat 
                 ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]' 
-                : 'liquid-glass text-white/70 hover:text-white'
+                : 'liquid-glass text-[#FDE047]/70 hover:text-[#FDE047]'
             }`}
           >
             {cat}
@@ -436,7 +436,7 @@ export default function Dashboard() {
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center py-20 text-white/40"
+            className="flex flex-col items-center justify-center py-20 text-[#FDE047]/40"
           >
             <AlertCircle size={48} className="mb-4 opacity-50" />
             <p className="font-serif text-2xl">No tasks found</p>
@@ -459,24 +459,24 @@ export default function Dashboard() {
 
                 <button 
                   onClick={() => updateTodo(todo._id, { isCompleted: !todo.isCompleted })}
-                  className="mx-4 text-white/50 hover:text-white transition-colors"
+                  className="mx-4 text-[#FDE047]/50 hover:text-[#FDE047] transition-colors"
                 >
                   {todo.isCompleted ? (
-                    <CheckCircle2 size={24} className="text-white" />
+                    <CheckCircle2 size={24} className="text-[#FDE047]" />
                   ) : (
                     <Circle size={24} />
                   )}
                 </button>
 
                 <div className="flex-1 min-w-0">
-                  <h3 className={`text-lg font-medium transition-all ${todo.isCompleted ? 'text-white/40 line-through' : 'text-white'}`}>
+                  <h3 className={`text-lg font-medium transition-all ${todo.isCompleted ? 'text-[#FDE047]/40 line-through' : 'text-[#FDE047]'}`}>
                     {todo.title}
                   </h3>
                   <div className="flex items-center gap-3 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className={`text-xs px-2 py-0.5 rounded-md border ${priorityColors[todo.meta.priority]}`}>
                       {todo.meta.priority}
                     </span>
-                    <span className="flex items-center text-xs text-white/40 gap-1">
+                    <span className="flex items-center text-xs text-[#FDE047]/40 gap-1">
                       <Tag size={12} /> {todo.meta.category}
                     </span>
                   </div>
@@ -485,7 +485,7 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button 
                     onClick={() => togglePin(todo._id)}
-                    className={`p-2 rounded-full transition-colors ${todo.meta.pinned ? 'text-white bg-white/10' : 'text-white/40 hover:bg-white/10 hover:text-white'}`}
+                    className={`p-2 rounded-full transition-colors ${todo.meta.pinned ? 'text-[#FDE047] bg-white/10' : 'text-[#FDE047]/40 hover:bg-white/10 hover:text-[#FDE047]'}`}
                   >
                     <Pin size={18} />
                   </button>
@@ -511,10 +511,10 @@ export default function Dashboard() {
             exit={{ opacity: 0, y: 50, x: '-50%' }}
             className="fixed bottom-10 left-1/2 liquid-glass rounded-full px-6 py-3 flex items-center gap-4 z-50 shadow-2xl"
           >
-            <span className="text-white text-sm">Task deleted</span>
+            <span className="text-[#FDE047] text-sm">Task deleted</span>
             <button 
               onClick={undoDelete}
-              className="text-white font-bold text-sm bg-white/20 hover:bg-white/30 px-4 py-1.5 rounded-full transition-colors"
+              className="text-[#FDE047] font-bold text-sm bg-white/20 hover:bg-white/30 px-4 py-1.5 rounded-full transition-colors"
             >
               Undo
             </button>
