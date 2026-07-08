@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "A beautiful to-do list for your interview",
 };
 
+import CinematicLayout from "@/components/CinematicLayout";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -17,9 +19,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+      </head>
       <body className={inter.className}>
         <AuthProvider>
-          {children}
+          <CinematicLayout>
+            {children}
+          </CinematicLayout>
         </AuthProvider>
       </body>
     </html>

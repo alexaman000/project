@@ -1,20 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Loader2, Quote } from 'lucide-react';
+
+
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   
   const { login } = useAuth();
   const router = useRouter();
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     setError('');
 
     const endpoint = isLogin ? '/auth/login' : '/auth/register';
@@ -33,65 +41,96 @@ export default function AuthPage() {
         throw new Error(data.message || 'Authentication failed');
       }
 
-      // Save token and redirect
       login(data.access_token);
       router.push('/');
     } catch (err: any) {
       setError(err.message);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '1rem' }}>
-      <div className="glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '400px', padding: '2rem' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', color: 'var(--primary)' }}>
-          {isLogin ? 'Welcome Back' : 'Create Account'}
-        </h2>
-        
-        {error && (
-          <div style={{ background: 'var(--danger)', color: 'white', padding: '0.5rem', borderRadius: '8px', marginBottom: '1rem', textAlign: 'center' }}>
-            {error}
-          </div>
-        )}
+    <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 text-center -translate-y-[10%] w-full">
+      {/* Inspirational Quote (Instrument Serif) */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1 }}
+        className="mb-12 max-w-2xl px-4 flex flex-col items-center"
+      >
+        <Quote className="text-white/40 mb-4" size={24} />
+        <h1 className="text-4xl md:text-5xl lg:text-6xl text-white mb-4 tracking-tight font-serif italic font-light leading-tight">
+          "The secret of getting ahead is getting started."
+        </h1>
+        <p className="text-white/60 text-sm tracking-widest uppercase">Mark Twain</p>
+      </motion.div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label>Email Address</label>
-            <input 
-              type="email" 
-              required 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-            />
-          </div>
-          
-          <div className="input-group">
-            <label>Password</label>
-            <input 
-              type="password" 
-              required 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-            />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
+        className="w-full max-w-md space-y-6"
+      >
+        <form onSubmit={handleSubmit} className="w-full space-y-4">
+          <div className="flex flex-col gap-3">
+            <div className="liquid-glass rounded-full px-6 py-1.5 flex items-center h-14">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-transparent border-none outline-none text-white placeholder:text-white/40 text-base w-full h-full"
+              />
+            </div>
+            
+            <div className="liquid-glass rounded-full px-6 py-1.5 flex items-center h-14">
+              <input
+                type="password"
+                placeholder="Enter your password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-transparent border-none outline-none text-white placeholder:text-white/40 text-base w-full h-full tracking-wider"
+              />
+            </div>
           </div>
 
-          <button type="submit" className="btn">
-            {isLogin ? 'Sign In' : 'Sign Up'}
+          {error && (
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-400 text-sm">
+              {error}
+            </motion.p>
+          )}
+
+          <button 
+            type="submit" 
+            disabled={isLoading}
+            className="w-full liquid-glass rounded-full px-6 py-3 flex items-center justify-center gap-3 text-white text-base font-medium hover:bg-white/10 transition-all group disabled:opacity-50"
+          >
+            {isLoading ? (
+              <Loader2 className="animate-spin" size={20} />
+            ) : (
+              <>
+                <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+                <div className="bg-white rounded-full p-1.5 text-black group-hover:scale-110 transition-transform">
+                  <ArrowRight size={16} />
+                </div>
+              </>
+            )}
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+        <p className="text-white/60 text-sm leading-relaxed px-4">
           {isLogin ? "Don't have an account? " : "Already have an account? "}
-          <span 
+          <button 
+            type="button" 
             onClick={() => setIsLogin(!isLogin)} 
-            style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 'bold' }}
+            className="text-white hover:underline font-medium"
           >
-            {isLogin ? 'Sign up' : 'Sign in'}
-          </span>
+            {isLogin ? "Sign up today" : "Log in here"}
+          </button>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }
