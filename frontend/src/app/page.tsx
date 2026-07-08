@@ -246,6 +246,27 @@ export default function Dashboard() {
     }
   };
 
+  const clearCompleted = async () => {
+    const completedTasks = todos.filter(t => t.isCompleted);
+    if (completedTasks.length === 0) return;
+    
+    // Optimistic UI update
+    setTodos(todos.filter(t => !t.isCompleted));
+    
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      await Promise.all(completedTasks.map(todo => 
+        fetch(`${apiUrl}/todos/${todo._id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ));
+    } catch (err) {
+      console.error("Failed to clear completed tasks", err);
+      fetchTodos();
+    }
+  };
+
   // Derived state
   const categories = ['All', ...Array.from(new Set(todos.map(t => t.meta.category)))];
   
@@ -401,6 +422,16 @@ export default function Dashboard() {
             <option value="Active" className="bg-[#0a192f]">Active</option>
             <option value="Completed" className="bg-[#0a192f]">Completed</option>
           </select>
+          {todos.some(t => t.isCompleted) && (
+            <button 
+              onClick={clearCompleted}
+              className="bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-full px-4 py-2 text-sm transition-colors border border-red-500/30 flex items-center gap-2"
+              title="Clear Completed Tasks"
+            >
+              <Trash2 size={16} />
+              <span className="hidden md:inline">Clear Completed</span>
+            </button>
+          )}
         </div>
       </motion.div>
 
