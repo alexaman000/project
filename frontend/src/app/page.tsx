@@ -64,11 +64,44 @@ export default function Dashboard() {
   const [newCategory, setNewCategory] = useState('Work');
   
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [weather, setWeather] = useState<{temp: number, code: number} | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    
+    const fetchWeather = async (lat: number, lon: number) => {
+      try {
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+        const data = await res.json();
+        if (data && data.current_weather) {
+          setWeather({ temp: Math.round(data.current_weather.temperature), code: data.current_weather.weathercode });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+        () => fetchWeather(40.7128, -74.0060) // Fallback NY
+      );
+    } else {
+      fetchWeather(40.7128, -74.0060);
+    }
+
     return () => clearInterval(timer);
   }, []);
+
+  const getWeatherIcon = (code: number) => {
+    if (code === 0) return <Sun size={28} className="text-[#FDE047] drop-shadow-[0_0_10px_rgba(253,224,71,0.5)]" />;
+    if (code >= 1 && code <= 3) return <CloudSun size={28} className="text-[#FDE047]/80" />;
+    if (code >= 45 && code <= 48) return <CloudFog size={28} className="text-[#FDE047]/60" />;
+    if (code >= 51 && code <= 67) return <CloudRain size={28} className="text-[#FDE047]/90" />;
+    if (code >= 71 && code <= 77) return <CloudSnow size={28} className="text-[#FDE047]" />;
+    if (code >= 95) return <CloudLightning size={28} className="text-[#FDE047]" />;
+    return <Cloud size={28} className="text-[#FDE047]/70" />;
+  };
   
   // Undo State
   const [undoSnackbar, setUndoSnackbar] = useState<{open: boolean, todo: Todo | null}>({ open: false, todo: null });
@@ -302,6 +335,21 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center gap-4">
+          {/* Weather Widget */}
+          {weather && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="liquid-glass rounded-2xl px-6 py-4 hidden sm:flex items-center gap-4"
+            >
+              {getWeatherIcon(weather.code)}
+              <div className="flex flex-col">
+                <span className="text-2xl font-serif text-[#FDE047] leading-none">{weather.temp}°C</span>
+                <span className="text-xs text-[#FDE047]/50 uppercase tracking-widest mt-1">Local</span>
+              </div>
+            </motion.div>
+          )}
+
           {/* Logout Button */}
           <motion.button
             initial={{ opacity: 0 }}
