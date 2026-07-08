@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Plus, CheckCircle2, Circle, 
   Trash2, Pin, Calendar, Tag, AlertCircle, ArrowUpRight,
-  Sun, CloudSun, CloudFog, CloudRain, CloudSnow, CloudLightning, Cloud
+  Sun, CloudSun, CloudFog, CloudRain, CloudSnow, CloudLightning, Cloud, LogOut
 } from 'lucide-react';
 
 interface TodoMeta {
@@ -334,20 +334,33 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Weather Widget */}
-        {weather && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="liquid-glass rounded-2xl px-6 py-4 flex items-center gap-4"
+        <div className="flex items-center gap-4">
+          {/* Weather Widget */}
+          {weather && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="liquid-glass rounded-2xl px-6 py-4 hidden sm:flex items-center gap-4"
+            >
+              {getWeatherIcon(weather.code)}
+              <div className="flex flex-col">
+                <span className="text-2xl font-serif text-[#FDE047] leading-none">{weather.temp}°C</span>
+                <span className="text-xs text-[#FDE047]/50 uppercase tracking-widest mt-1">Local</span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Logout Button */}
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            onClick={logout}
+            className="liquid-glass rounded-2xl p-4 flex items-center justify-center text-[#FDE047]/70 hover:text-[#FDE047] hover:bg-white/10 transition-colors h-full"
+            title="Log out"
           >
-            {getWeatherIcon(weather.code)}
-            <div className="flex flex-col">
-              <span className="text-2xl font-serif text-[#FDE047] leading-none">{weather.temp}°C</span>
-              <span className="text-xs text-[#FDE047]/50 uppercase tracking-widest mt-1">Local</span>
-            </div>
-          </motion.div>
-        )}
+            <LogOut size={28} />
+          </motion.button>
+        </div>
       </motion.div>
 
       {/* Stats Cards */}
