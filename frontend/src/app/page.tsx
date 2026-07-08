@@ -81,13 +81,15 @@ export default function Dashboard() {
       }
     };
     
+    // Fetch fallback immediately so it shows up instantly
+    fetchWeather(40.7128, -74.0060);
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
-        () => fetchWeather(40.7128, -74.0060) // Fallback NY
+        () => {}, // Ignore errors, fallback already loaded
+        { timeout: 5000 }
       );
-    } else {
-      fetchWeather(40.7128, -74.0060);
     }
 
     return () => clearInterval(timer);
@@ -340,7 +342,7 @@ export default function Dashboard() {
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="liquid-glass rounded-2xl px-6 py-4 hidden sm:flex items-center gap-4"
+              className="liquid-glass rounded-2xl px-6 py-4 flex items-center gap-4"
             >
               {getWeatherIcon(weather.code)}
               <div className="flex flex-col">
