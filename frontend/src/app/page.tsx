@@ -6,9 +6,11 @@ import { useAuth } from '@/context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Plus, CheckCircle2, Circle, 
-  Trash2, Pin, Calendar, Tag, AlertCircle, ArrowUpRight,
-  Sun, CloudSun, CloudFog, CloudRain, CloudSnow, CloudLightning, Cloud, LogOut
+  Trash2, Pin, Tag, AlertCircle, ArrowUpRight,
+  Sun, CloudSun, CloudFog, CloudRain, CloudSnow, CloudLightning, Cloud, LogOut,
+  Bell, Settings, Calendar
 } from 'lucide-react';
+import NotificationBell from '@/components/NotificationBell';
 
 interface TodoMeta {
   priority: 'High' | 'Medium' | 'Low';
@@ -20,13 +22,42 @@ interface TodoMeta {
 interface RawTodo {
   _id: string;
   title: string;
-  description: string; // Will store JSON
+  description: string;
   isCompleted: boolean;
+  reminderEnabled?: boolean;
+  reminderDateTime?: string | null;
+  reminderBeforeMinutes?: number;
+  timezone?: string;
+  reminderSent?: boolean;
+  isRecurring?: boolean;
+  recurringType?: string | null;
+  dueDateTime?: string | null;
 }
 
 interface Todo extends RawTodo {
   meta: TodoMeta;
 }
+
+const REMINDER_OPTIONS = [
+  { label: 'At exact time', value: 0 },
+  { label: '5 minutes before', value: 5 },
+  { label: '10 minutes before', value: 10 },
+  { label: '15 minutes before', value: 15 },
+  { label: '30 minutes before', value: 30 },
+  { label: '1 hour before', value: 60 },
+  { label: '2 hours before', value: 120 },
+  { label: '1 day before', value: 1440 },
+];
+
+const RECURRING_OPTIONS = [
+  { label: 'None', value: '' },
+  { label: 'Daily', value: 'daily' },
+  { label: 'Weekly', value: 'weekly' },
+  { label: 'Monthly', value: 'monthly' },
+  { label: 'Yearly', value: 'yearly' },
+  { label: 'Weekdays', value: 'weekdays' },
+  { label: 'Weekends', value: 'weekends' },
+];
 
 // Helper to safely parse description JSON without breaking old tasks
 const parseMeta = (description: string): TodoMeta => {
@@ -62,6 +93,46 @@ export default function Dashboard() {
   const [newTitle, setNewTitle] = useState('');
   const [newPriority, setNewPriority] = useState<'High' | 'Medium' | 'Low'>('Medium');
   const [newCategory, setNewCategory] = useState('Work');
+
+  // Reminder Modal State
+  const [reminderModal, setReminderModal] = useState<{ open: boolean; todo: Todo | null }>({ open: false, todo: null });
+  const [remDate, setRemDate] = useState('');
+  const [remTime, setRemTime] = useState('');
+  const [remBefore, setRemBefore] = useState(0);
+  const [remRecurring, setRemRecurring] = useState('');
+  const [remEnabled, setRemEnabled] = useState(false);
+
+  const openReminderModal = (todo: Todo) => {
+    setReminderModal({ open: true, todo });
+    setRemEnabled(todo.reminderEnabled ?? false);
+    if (todo.reminderDateTime) {
+      const d = new Date(todo.reminderDateTime);
+      setRemDate(d.toISOString().split('T')[0]);
+      setRemTime(d.toTimeString().slice(0, 5));
+    } else {
+      const now = new Date();
+      setRemDate(now.toISOString().split('T')[0]);
+      setRemTime(now.toTimeString().slice(0, 5));
+    }
+    setRemBefore(todo.reminderBeforeMinutes ?? 0);
+    setRemRecurring(todo.recurringType ?? '');
+  };
+
+  const saveReminder = async () => {
+    if (!reminderModal.todo) return;
+    const reminderDateTime = remEnabled && remDate && remTime
+      ? new Date(`${remDate}T${remTime}`).toISOString()
+      : null;
+    await updateTodo(reminderModal.todo._id, {
+      reminderEnabled: remEnabled,
+      reminderDateTime,
+      reminderBeforeMinutes: remBefore,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      isRecurring: !!remRecurring,
+      recurringType: remRecurring || null,
+    } as any);
+    setReminderModal({ open: false, todo: null });
+  };
   
   const [currentTime, setCurrentTime] = useState(new Date());
   const [weather, setWeather] = useState<{temp: number, code: number} | null>(null);
@@ -352,6 +423,18 @@ export default function Dashboard() {
             </motion.div>
           )}
 
+          {/* Notification Bell */}
+          <NotificationBell />
+
+          {/* Settings Link */}
+          <a
+            href="/settings"
+            className="liquid-glass p-4 rounded-2xl flex items-center justify-center text-[#FDE047]/70 hover:text-[#FDE047] hover:bg-white/10 transition-colors"
+            title="Settings"
+          >
+            <Settings size={28} />
+          </a>
+
           {/* Logout Button */}
           <motion.button
             initial={{ opacity: 0 }}
@@ -518,17 +601,41 @@ export default function Dashboard() {
                   <h3 className={`text-lg font-medium transition-all ${todo.isCompleted ? 'text-[#FDE047]/40 line-through' : 'text-[#FDE047]'}`}>
                     {todo.title}
                   </h3>
-                  <div className="flex items-center gap-3 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-3 mt-1">
                     <span className={`text-xs px-2 py-0.5 rounded-md border ${priorityColors[todo.meta.priority]}`}>
                       {todo.meta.priority}
                     </span>
                     <span className="flex items-center text-xs text-[#FDE047]/40 gap-1">
                       <Tag size={12} /> {todo.meta.category}
                     </span>
+                    {todo.reminderEnabled && todo.reminderDateTime && (
+                      <span className={`flex items-center text-xs gap-1 ${
+                        new Date(todo.reminderDateTime) < new Date() && !todo.reminderSent
+                          ? 'text-red-400'
+                          : todo.reminderSent
+                          ? 'text-[#FDE047]/30'
+                          : 'text-green-400'
+                      }`}>
+                        <Bell size={11} />
+                        {new Date(todo.reminderDateTime).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {/* Reminder Bell */}
+                  <button
+                    onClick={() => openReminderModal(todo)}
+                    className={`p-2 rounded-full transition-colors ${
+                      todo.reminderEnabled
+                        ? 'text-[#FDE047] bg-white/10'
+                        : 'text-[#FDE047]/40 hover:bg-white/10 hover:text-[#FDE047]'
+                    }`}
+                    title="Set Reminder"
+                  >
+                    <Bell size={18} />
+                  </button>
                   <button 
                     onClick={() => togglePin(todo._id)}
                     className={`p-2 rounded-full transition-colors ${todo.meta.pinned ? 'text-[#FDE047] bg-white/10' : 'text-[#FDE047]/40 hover:bg-white/10 hover:text-[#FDE047]'}`}
@@ -564,6 +671,131 @@ export default function Dashboard() {
             >
               Undo
             </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Reminder Modal */}
+      <AnimatePresence>
+        {reminderModal.open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={(e) => e.target === e.currentTarget && setReminderModal({ open: false, todo: null })}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-md rounded-3xl p-6"
+              style={{ background: 'rgba(10,15,30,0.95)', border: '1px solid rgba(253,224,71,0.2)', backdropFilter: 'blur(20px)' }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-[#FDE047] font-serif text-2xl">Set Reminder</h2>
+                <button onClick={() => setReminderModal({ open: false, todo: null })} className="text-[#FDE047]/40 hover:text-[#FDE047]">
+                  <span className="text-2xl">×</span>
+                </button>
+              </div>
+
+              <p className="text-[#FDE047]/60 text-sm mb-6 truncate">
+                Task: <span className="text-[#FDE047]">{reminderModal.todo?.title}</span>
+              </p>
+
+              {/* Enable Toggle */}
+              <div className="flex items-center justify-between mb-5 liquid-glass rounded-2xl px-4 py-3">
+                <span className="text-[#FDE047] font-medium">Enable Reminder</span>
+                <button
+                  onClick={() => setRemEnabled(!remEnabled)}
+                  className={`w-12 h-6 rounded-full transition-colors relative ${
+                    remEnabled ? 'bg-[#FDE047]' : 'bg-white/10'
+                  }`}
+                >
+                  <span className={`absolute top-0.5 w-5 h-5 bg-black rounded-full transition-all ${
+                    remEnabled ? 'left-6' : 'left-0.5'
+                  }`} />
+                </button>
+              </div>
+
+              {remEnabled && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="space-y-4"
+                >
+                  {/* Date & Time */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[#FDE047]/60 text-xs uppercase tracking-widest mb-1 block">Date</label>
+                      <input
+                        type="date"
+                        value={remDate}
+                        onChange={(e) => setRemDate(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-[#FDE047] outline-none focus:border-[#FDE047]/40 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[#FDE047]/60 text-xs uppercase tracking-widest mb-1 block">Time</label>
+                      <input
+                        type="time"
+                        value={remTime}
+                        onChange={(e) => setRemTime(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-[#FDE047] outline-none focus:border-[#FDE047]/40 text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Remind Before */}
+                  <div>
+                    <label className="text-[#FDE047]/60 text-xs uppercase tracking-widest mb-1 block">Remind Me</label>
+                    <select
+                      value={remBefore}
+                      onChange={(e) => setRemBefore(Number(e.target.value))}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-[#FDE047] outline-none focus:border-[#FDE047]/40 text-sm"
+                    >
+                      {REMINDER_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value} className="bg-[#0a192f]">{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Recurring */}
+                  <div>
+                    <label className="text-[#FDE047]/60 text-xs uppercase tracking-widest mb-1 block">Recurring</label>
+                    <select
+                      value={remRecurring}
+                      onChange={(e) => setRemRecurring(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-[#FDE047] outline-none focus:border-[#FDE047]/40 text-sm"
+                    >
+                      {RECURRING_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value} className="bg-[#0a192f]">{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Timezone */}
+                  <p className="text-[#FDE047]/30 text-xs">
+                    Timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone}
+                  </p>
+                </motion.div>
+              )}
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setReminderModal({ open: false, todo: null })}
+                  className="flex-1 py-3 rounded-2xl border border-white/10 text-[#FDE047]/60 hover:text-[#FDE047] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveReminder}
+                  className="flex-1 py-3 rounded-2xl bg-[#FDE047] text-black font-bold hover:bg-[#FDE047]/90 transition-colors"
+                >
+                  Save Reminder
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
