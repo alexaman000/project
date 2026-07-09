@@ -15,7 +15,9 @@ import { JwtService } from '@nestjs/jwt';
   cors: { origin: '*' },
   namespace: '/notifications',
 })
-export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class NotificationsGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
@@ -29,7 +31,10 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
     try {
       const token =
         (client.handshake.auth?.token as string) ||
-        (client.handshake.headers?.authorization as string)?.replace('Bearer ', '');
+        (client.handshake.headers?.authorization as string)?.replace(
+          'Bearer ',
+          '',
+        );
 
       if (!token) {
         client.disconnect();
@@ -73,6 +78,9 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
 
   /** Check if a user currently has an active socket connection */
   isUserOnline(userId: string): boolean {
-    return this.userSockets.has(userId) && (this.userSockets.get(userId)?.size ?? 0) > 0;
+    return (
+      this.userSockets.has(userId) &&
+      (this.userSockets.get(userId)?.size ?? 0) > 0
+    );
   }
 }

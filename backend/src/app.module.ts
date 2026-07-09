@@ -16,7 +16,9 @@ import { SettingsModule } from './settings/settings.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
-    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/todo-app'),
+    MongooseModule.forRoot(
+      process.env.MONGODB_URI || 'mongodb://localhost:27017/todo-app',
+    ),
     UsersModule,
     AuthModule,
     TodosModule,

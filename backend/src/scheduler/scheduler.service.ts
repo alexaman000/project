@@ -30,12 +30,14 @@ export class SchedulerService {
 
     try {
       // Find all reminder-enabled, not-yet-sent todos where the computed trigger time is in [windowStart, now]
-      const todos = await this.todoModel.find({
-        reminderEnabled: true,
-        reminderSent: false,
-        isCompleted: false,
-        reminderDateTime: { $ne: null },
-      }).exec();
+      const todos = await this.todoModel
+        .find({
+          reminderEnabled: true,
+          reminderSent: false,
+          isCompleted: false,
+          reminderDateTime: { $ne: null },
+        })
+        .exec();
 
       for (const todo of todos) {
         try {
@@ -44,14 +46,18 @@ export class SchedulerService {
           // Compute the actual moment the reminder should fire:
           // reminderDateTime is the task due time; subtract reminderBeforeMinutes
           const triggerTime = new Date(
-            todo.reminderDateTime.getTime() - (todo.reminderBeforeMinutes || 0) * 60 * 1000,
+            todo.reminderDateTime.getTime() -
+              (todo.reminderBeforeMinutes || 0) * 60 * 1000,
           );
 
           if (triggerTime >= windowStart && triggerTime <= now) {
             await this.processReminder(todo);
           }
         } catch (innerErr) {
-          this.logger.error(`Error processing reminder for todo ${todo._id}:`, innerErr.message);
+          this.logger.error(
+            `Error processing reminder for todo ${todo._id}:`,
+            innerErr.message,
+          );
         }
       }
     } catch (err) {
@@ -82,10 +88,10 @@ export class SchedulerService {
       reminderBeforeMinutes === 0
         ? 'at the exact time'
         : reminderBeforeMinutes < 60
-        ? `${reminderBeforeMinutes} minutes before`
-        : reminderBeforeMinutes < 1440
-        ? `${reminderBeforeMinutes / 60} hour(s) before`
-        : '1 day before';
+          ? `${reminderBeforeMinutes} minutes before`
+          : reminderBeforeMinutes < 1440
+            ? `${reminderBeforeMinutes / 60} hour(s) before`
+            : '1 day before';
 
     // 1. Create in-app notification
     const notification = await this.notificationsService.create({
@@ -128,7 +134,10 @@ export class SchedulerService {
 
     // 5. If recurring, schedule next reminder
     if (todo.isRecurring && todo.recurringType && todo.reminderDateTime) {
-      const next = this.computeNextRecurrence(todo.reminderDateTime, todo.recurringType);
+      const next = this.computeNextRecurrence(
+        todo.reminderDateTime,
+        todo.recurringType,
+      );
       await this.todoModel.findByIdAndUpdate(todo._id, {
         reminderDateTime: next,
         reminderSent: false,
@@ -137,7 +146,9 @@ export class SchedulerService {
       });
     }
 
-    this.logger.log(`Reminder processed for todo "${todo.title}" (userId: ${userId})`);
+    this.logger.log(
+      `Reminder processed for todo "${todo.title}" (userId: ${userId})`,
+    );
   }
 
   private computeNextRecurrence(current: Date, type: string): Date {
@@ -156,10 +167,14 @@ export class SchedulerService {
         next.setFullYear(next.getFullYear() + 1);
         break;
       case 'weekdays':
-        do { next.setDate(next.getDate() + 1); } while ([0, 6].includes(next.getDay()));
+        do {
+          next.setDate(next.getDate() + 1);
+        } while ([0, 6].includes(next.getDay()));
         break;
       case 'weekends':
-        do { next.setDate(next.getDate() + 1); } while (![0, 6].includes(next.getDay()));
+        do {
+          next.setDate(next.getDate() + 1);
+        } while (![0, 6].includes(next.getDay()));
         break;
       default:
         next.setDate(next.getDate() + 1);

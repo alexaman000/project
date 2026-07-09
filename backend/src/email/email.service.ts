@@ -30,14 +30,30 @@ export class EmailService {
     dueDateTime: Date | null;
     reminderBeforeMinutes: number;
   }): Promise<boolean> {
-    const { to, taskTitle, description, priority, category, dueDateTime, reminderBeforeMinutes } = params;
+    const {
+      to,
+      taskTitle,
+      description,
+      priority,
+      category,
+      dueDateTime,
+      reminderBeforeMinutes,
+    } = params;
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 
     const dueDateStr = dueDateTime
-      ? dueDateTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+      ? dueDateTime.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
       : 'Not set';
     const dueTimeStr = dueDateTime
-      ? dueDateTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+      ? dueDateTime.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
       : 'Not set';
 
     const reminderNote =
@@ -46,7 +62,11 @@ export class EmailService {
         : 'This is your reminder for the task at the exact time.';
 
     const priorityColor =
-      priority === 'High' ? '#ef4444' : priority === 'Medium' ? '#f59e0b' : '#22c55e';
+      priority === 'High'
+        ? '#ef4444'
+        : priority === 'Medium'
+          ? '#f59e0b'
+          : '#22c55e';
 
     const htmlBody = `
 <!DOCTYPE html>
@@ -144,7 +164,10 @@ export class EmailService {
       this.logger.log(`Reminder email sent to ${to} for task: ${taskTitle}`);
       return true;
     } catch (error) {
-      this.logger.error(`Failed to send reminder email to ${to}:`, error.message);
+      this.logger.error(
+        `Failed to send reminder email to ${to}:`,
+        error.message,
+      );
       return false;
     }
   }

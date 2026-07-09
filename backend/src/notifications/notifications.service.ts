@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Notification, NotificationDocument } from './schemas/notification.schema';
+import {
+  Notification,
+  NotificationDocument,
+} from './schemas/notification.schema';
 
 @Injectable()
 export class NotificationsService {
   constructor(
-    @InjectModel(Notification.name) private notificationModel: Model<NotificationDocument>,
+    @InjectModel(Notification.name)
+    private notificationModel: Model<NotificationDocument>,
   ) {}
 
   async create(data: {
@@ -34,32 +38,43 @@ export class NotificationsService {
       .exec();
   }
 
-  async markAsRead(id: string, userId: string): Promise<NotificationDocument | null> {
-    return this.notificationModel.findOneAndUpdate(
-      { _id: id, userId: new Types.ObjectId(userId) },
-      { read: true },
-      { new: true },
-    ).exec();
+  async markAsRead(
+    id: string,
+    userId: string,
+  ): Promise<NotificationDocument | null> {
+    return this.notificationModel
+      .findOneAndUpdate(
+        { _id: id, userId: new Types.ObjectId(userId) },
+        { read: true },
+        { new: true },
+      )
+      .exec();
   }
 
   async markAllAsRead(userId: string): Promise<void> {
-    await this.notificationModel.updateMany(
-      { userId: new Types.ObjectId(userId), read: false },
-      { read: true },
-    ).exec();
+    await this.notificationModel
+      .updateMany(
+        { userId: new Types.ObjectId(userId), read: false },
+        { read: true },
+      )
+      .exec();
   }
 
   async delete(id: string, userId: string): Promise<any> {
-    return this.notificationModel.findOneAndDelete({
-      _id: id,
-      userId: new Types.ObjectId(userId),
-    }).exec();
+    return this.notificationModel
+      .findOneAndDelete({
+        _id: id,
+        userId: new Types.ObjectId(userId),
+      })
+      .exec();
   }
 
   async countUnread(userId: string): Promise<number> {
-    return this.notificationModel.countDocuments({
-      userId: new Types.ObjectId(userId),
-      read: false,
-    }).exec();
+    return this.notificationModel
+      .countDocuments({
+        userId: new Types.ObjectId(userId),
+        read: false,
+      })
+      .exec();
   }
 }

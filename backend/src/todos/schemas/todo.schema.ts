@@ -40,7 +40,20 @@ export class Todo {
   @Prop({ default: false })
   isRecurring: boolean;
 
-  @Prop({ enum: ['daily', 'weekly', 'monthly', 'yearly', 'weekdays', 'weekends', 'custom', null], default: null })
+  @Prop({
+    type: String,
+    enum: [
+      'daily',
+      'weekly',
+      'monthly',
+      'yearly',
+      'weekdays',
+      'weekends',
+      'custom',
+      null,
+    ],
+    default: null,
+  })
   recurringType: string | null;
 
   // --- Notification tracking ---
@@ -56,4 +69,3 @@ export class Todo {
 }
 
 export const TodoSchema = SchemaFactory.createForClass(Todo);
-
