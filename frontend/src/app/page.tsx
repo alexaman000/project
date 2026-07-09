@@ -273,7 +273,13 @@ export default function Dashboard() {
         body: JSON.stringify({ 
           title: updatedTodo.title,
           isCompleted: updatedTodo.isCompleted,
-          description: encodeMeta(updatedTodo.meta)
+          description: encodeMeta(updatedTodo.meta),
+          reminderEnabled: updatedTodo.reminderEnabled,
+          reminderDateTime: updatedTodo.reminderDateTime,
+          reminderBeforeMinutes: updatedTodo.reminderBeforeMinutes,
+          timezone: updatedTodo.timezone,
+          isRecurring: updatedTodo.isRecurring,
+          recurringType: updatedTodo.recurringType,
         })
       });
     } catch (err) {
