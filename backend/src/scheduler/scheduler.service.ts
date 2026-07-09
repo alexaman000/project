@@ -50,7 +50,7 @@ export class SchedulerService {
               (todo.reminderBeforeMinutes || 0) * 60 * 1000,
           );
 
-          if (triggerTime >= windowStart && triggerTime <= now) {
+          if (triggerTime <= now) {
             await this.processReminder(todo);
           }
         } catch (innerErr) {
