@@ -36,7 +36,7 @@ Respond directly to the user's message below, utilizing the context of their tas
 User Message: "${userMessage}"`;
 
       // 3. Call Gemini
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
       const result = await model.generateContent(systemPrompt);
       const response = await result.response;
       return response.text();
