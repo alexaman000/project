@@ -1,0 +1,69 @@
+version: '3.9'
+
+services:
+  # ─────────────────────────────
+  # MongoDB Database
+  # ─────────────────────────────
+  mongo:
+    image: mongo:7
+    container_name: todo-mongo
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - todo-network
+
+  # ─────────────────────────────
+  # NestJS Backend
+  # ─────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: todo-backend
+    restart: unless-stopped
+    ports:
+      - '3001:3001'
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/todo-app
+      - JWT_SECRET=${JWT_SECRET:-supersecretjwtkey123}
+      - EMAIL_HOST=${EMAIL_HOST:-smtp.gmail.com}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - EMAIL_FROM=${EMAIL_FROM:-noreply@todoapp.com}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    depends_on:
+      - mongo
+    networks:
+      - todo-network
+
+  # ─────────────────────────────
+  # Next.js Frontend
+  # ─────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+    container_name: todo-frontend
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+    depends_on:
+      - backend
+    networks:
+      - todo-network
+
+networks:
+  todo-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
