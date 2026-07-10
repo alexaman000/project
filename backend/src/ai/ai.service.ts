@@ -1,18 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GoogleGenerativeAI, Content } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 import { TodosService } from '../todos/todos.service';
 
 @Injectable()
 export class AiService {
   private readonly logger = new Logger(AiService.name);
-  private genAI: GoogleGenerativeAI;
+  private groq: Groq;
 
   constructor(private readonly todosService: TodosService) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      this.logger.warn('GEMINI_API_KEY is missing!');
+      this.logger.warn('GROQ_API_KEY is missing!');
     }
-    this.genAI = new GoogleGenerativeAI(apiKey || '');
+    this.groq = new Groq({ apiKey: apiKey || '' });
   }
 
   async handleChat(
@@ -40,36 +40,41 @@ ${pending.length ? pending.map(formatTask).join('\n') : 'None'}
 Completed tasks (${completed.length}):
 ${completed.length ? completed.map(formatTask).join('\n') : 'None'}`.trim();
 
-      // 2. Build the system instruction
-      const systemInstruction = `You are a smart, friendly, and concise AI productivity assistant built into a Todo App.
+      const systemPrompt = `You are a smart, friendly, and concise AI productivity assistant built into a Todo App.
 You have real-time access to the user's task list shown below. Use this context to give specific, personalized answers.
-Never say you "don't have access" to the tasks — you do. Be encouraging and keep responses short and actionable.
+Never say you don't have access to the tasks — you do. Be encouraging and keep responses short and actionable.
 Current date and time: ${new Date().toLocaleString()}
 
 User's Task List:
 ${taskContext}`;
 
-      // 3. Build chat history for multi-turn conversation
-      const chatHistory: Content[] = history.map((h) => ({
-        role: h.role,
-        parts: [{ text: h.text }],
-      }));
+      // 2. Build chat history for multi-turn conversation
+      const messages: Groq.Chat.ChatCompletionMessageParam[] = [
+        { role: 'system', content: systemPrompt },
+        ...history.map((h) => ({
+          role: h.role === 'model' ? ('assistant' as const) : ('user' as const),
+          content: h.text,
+        })),
+        { role: 'user', content: userMessage },
+      ];
 
-      // 4. Start chat session with history
-      const model = this.genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
-        systemInstruction,
+      // 3. Call Groq
+      const completion = await this.groq.chat.completions.create({
+        model: 'llama-3.3-70b-versatile',
+        messages,
+        max_tokens: 512,
       });
 
-      const chat = model.startChat({ history: chatHistory });
-      const result = await chat.sendMessage(userMessage);
-      return result.response.text();
+      return completion.choices[0]?.message?.content || 'No response generated.';
     } catch (error: any) {
       this.logger.error('AI Chat Error:', error.message);
       if (error.message?.includes('quota') || error.message?.includes('429')) {
-        return "⚠️ The AI quota has been exceeded. Please generate a new Gemini API key at aistudio.google.com/app/apikey and update it in your Render environment variables.";
+        return '⚠️ AI quota exceeded. Please check your GROQ_API_KEY in Render environment variables.';
       }
-      return "Oops! I'm having trouble connecting right now. Please check the API Key in Render environment variables.";
+      if (error.message?.includes('API key') || error.message?.includes('auth') || error.message?.includes('401')) {
+        return '⚠️ Invalid API key. Please add a valid GROQ_API_KEY to your Render environment variables. Get one free at console.groq.com';
+      }
+      return "Oops! I'm having trouble connecting right now. Please check the GROQ_API_KEY in Render environment variables.";
     }
   }
 }
