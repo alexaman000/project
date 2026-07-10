@@ -36,9 +36,15 @@ export default function AiAssistant() {
     if (!input.trim() || !token) return;
 
     const userMessage: Message = { id: Date.now().toString(), role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setInput('');
     setIsLoading(true);
+
+    // Build history excluding welcome message, excluding the latest user message
+    const history = updatedMessages
+      .slice(1, -1) // skip welcome AI message and the current user message
+      .map(m => ({ role: m.role === 'user' ? 'user' : 'model' as 'user' | 'model', text: m.content }));
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -48,7 +54,7 @@ export default function AiAssistant() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ message: userMessage.content })
+        body: JSON.stringify({ message: userMessage.content, history })
       });
       
       const data = await res.json();
