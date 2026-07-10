@@ -12,6 +12,8 @@ import { EmailModule } from './email/email.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { SettingsModule } from './settings/settings.module';
 
+import { AiModule } from './ai/ai.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -26,6 +28,7 @@ import { SettingsModule } from './settings/settings.module';
     EmailModule,
     SchedulerModule,
     SettingsModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],

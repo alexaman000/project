@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 };
 
 import CinematicLayout from "@/components/CinematicLayout";
+import AiAssistant from "@/components/AiAssistant";
 
 export default function RootLayout({
   children,
@@ -28,6 +29,7 @@ export default function RootLayout({
           <NotificationProvider>
             <CinematicLayout>
               {children}
+              <AiAssistant />
             </CinematicLayout>
           </NotificationProvider>
         </AuthProvider>
